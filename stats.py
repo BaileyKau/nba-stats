@@ -1,20 +1,18 @@
-import http.client
+from nba_api.stats.endpoints import playercareerstats
+from nba_api.stats.static import players
 
-conn = http.client.HTTPSConnection("api-nba-v1.p.rapidapi.com")
+playerName = input("Enter the player's name: ")
 
-headers = {
-    'x-rapidapi-host': "api-nba-v1.p.rapidapi.com",
-    'x-rapidapi-key': "dc1dbb148emsh667601f198be67bp12c8a8jsnbd71fa52dcdc"
-    }
+player = players.find_players_by_full_name(playerName)
+playerID = player[0]['id']
+career = playercareerstats.PlayerCareerStats(player_id=playerID) 
 
-conn.request("GET", "/players?name=Devion Mitchell", headers=headers)
+# print("JSON: " + career.get_json())
+# print(career.get_dict())
 
-res = conn.getresponse()
-data = res.read()
-
-print(data)
-
-# playerName = input("Enter the player's name: ")
+# Data Frame [0] is the season by season breakdown of statistics 
+# Data Frame [1] is the all time totals
+print(career.get_data_frames())
 
 # statsNeeded = input("""\nAbbreviations:\n
 # 'P' Points\n           
@@ -26,3 +24,27 @@ print(data)
 # 'P+R' Pts + Rebs\n
 # 'TO' Turnovers\n
 # Enter the statistic needed: """)
+
+
+
+
+# url = "https://api-nba-v1.p.rapidapi.com/players"
+
+# querystring = {}
+
+# headers = {
+# 	"X-RapidAPI-Key": "dc1dbb148emsh667601f198be67bp12c8a8jsnbd71fa52dcdc",
+# 	"X-RapidAPI-Host": "api-nba-v1.p.rapidapi.com"
+# }
+
+# playerName = input("Enter the player's last name: ")
+# querystring['name'] = playerName
+
+# response = requests.get(url, headers=headers, params=querystring)
+
+# if (response.json()['results'] < 1):
+#     print("No results found for this player!")
+# elif (response.json()['results'] == 1):
+#     querystring['id'] = response.json()['response'][0]['id']
+#     del querystring['name']
+#     print(querystring)
