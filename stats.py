@@ -1,31 +1,70 @@
-from nba_api.stats.endpoints import playercareerstats
-from nba_api.stats.static import players
+from nba_api.stats.endpoints import playercareerstats, teamvsplayer
+from nba_api.stats.static import players, teams
 
-playerName = input("Enter the player's name: ")
+playerName = input("Enter the player's full name: ")
+# teamName = input("Enter the opposing team: ")
 
 player = players.find_players_by_full_name(playerName)
-playerID = player[0]['id']
-career = playercareerstats.PlayerCareerStats(player_id=playerID) 
+# Loop the user input to get the correct answer
+#playerID is None
 
-# print("JSON: " + career.get_json())
-# print(career.get_dict())
+if len(player) != 0:
+    playerID = player[0]['id']
+#If no players are found
+# REMEMBER TO TRY USING NLP LIBRARIES 
+else:
+    for player in players.find_players_by_first_name(playerName.split(" ")[0]):
+        if player['last_name'] == playerName.split(" ")[1]:
+            playerID = player['id']
+    try:
+        playerID
+    except NameError:
+        for player in players.find_players_by_last_name(playerName.split(" ")[1]):
+            if player['first_name'] == playerName.split(" ")[0]:
+                playerID = player['id']
 
+    
 # Data Frame [0] is the season by season breakdown of statistics 
 # Data Frame [1] is the all time totals
-print(career.get_data_frames())
+career = playercareerstats.PlayerCareerStats(player_id=playerID) 
+allTime = career.get_data_frames()[1].loc[0]
+perSeason = career.get_data_frames()[0]
+gamesPlayed = allTime.loc['GP']
+recentSeason = perSeason.iloc[len(career.get_data_frames()[0])-1]
+gamesPlayedThisYear = recentSeason.loc['GP']
 
-# statsNeeded = input("""\nAbbreviations:\n
-# 'P' Points\n           
-# 'R' Rebounds\n      
-# 'A' Assists\n       
-# 'S' Steals\n        
-# 'B' Blocks\n        
-# 'FP' Fantasy Points\n
-# 'P+R' Pts + Rebs\n
-# 'TO' Turnovers\n
-# Enter the statistic needed: """)
+print("----------------------------------------------------")
 
+statsNeeded = input("""Abbreviations:\n
+'PTS' Points\n           
+'REB' Rebounds (OREB/DREB)\n      
+'AST' Assists\n       
+'STL' Steals\n        
+'BLK' Blocks\n
+'FGA/FGM' Field Goals Attempted/Field Goals Made\n
+'PF' Personal Fouls\n
+'TOV' Turnovers
+----------------------------------------------------
+Use '+' for combined statistics: PTS+REB
+Enter the statistic needed: """)
 
+statList = statsNeeded.split("+")
+allTimeStat = 0
+thisSeasonStat = 0
+for stat in statList:
+    allTimeStat += allTime[stat]
+    thisSeasonStat += recentSeason[stat]
+
+print("------------------------------------------------------------")
+print("| All time, " + playerName + " has: \n|")
+allTimeAvg = round(allTimeStat/gamesPlayed, 2)
+print("| " + str(allTimeStat) + " " + statsNeeded + " in " + str(gamesPlayed) + " games to average " + str(allTimeAvg) + " " + statsNeeded)
+
+print("------------------------------------------------------------")
+print("| This season, " + playerName + " has: \n|")
+thisSeasonAvg = round(thisSeasonStat/gamesPlayedThisYear, 2)
+print("| " + str(thisSeasonStat) + " " + statsNeeded + " in " + str(gamesPlayedThisYear) + " games to average " + str(thisSeasonAvg) + " " + statsNeeded)
+print("------------------------------------------------------------")
 
 
 # url = "https://api-nba-v1.p.rapidapi.com/players"
