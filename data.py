@@ -1,13 +1,19 @@
-from nba_api.stats.endpoints import playercareerstats, teamvsplayer
-from nba_api.stats.static import players, teams
+from nba_api.stats.endpoints import playercareerstats
+from nba_api.stats.static import players
+from nba_api.stats.static import teams
+from nba_api.stats.endpoints import playergamelog
+from nba_api.stats.library.parameters import SeasonAll
+import pandas as pd
+import math
+
+#-----------------------------------------------Player Career Stats------------------------------------------------------------
 
 playerName = input("Enter the player's full name: ")
-# teamName = input("Enter the opposing team: ")
 
 player = players.find_players_by_full_name(playerName)
+
 # Loop the user input to get the correct answer
 #playerID is None
-
 if len(player) != 0:
     playerID = player[0]['id']
 #If no players are found
@@ -55,17 +61,48 @@ for stat in statList:
     allTimeStat += allTime[stat]
     thisSeasonStat += recentSeason[stat]
 
-print("------------------------------------------------------------")
+print("--------------------------------------------------------------------------------------------------------------------------------------------------------------")
 print("| All time, " + playerName + " has: \n|")
 allTimeAvg = round(allTimeStat/gamesPlayed, 2)
 print("| " + str(allTimeStat) + " " + statsNeeded + " in " + str(gamesPlayed) + " games to average " + str(allTimeAvg) + " " + statsNeeded)
 
-print("------------------------------------------------------------")
+print("--------------------------------------------------------------------------------------------------------------------------------------------------------------")
 print("| This season, " + playerName + " has: \n|")
 thisSeasonAvg = round(thisSeasonStat/gamesPlayedThisYear, 2)
 print("| " + str(thisSeasonStat) + " " + statsNeeded + " in " + str(gamesPlayedThisYear) + " games to average " + str(thisSeasonAvg) + " " + statsNeeded)
-print("------------------------------------------------------------")
+print("--------------------------------------------------------------------------------------------------------------------------------------------------------------")
 
+line = float(input("| What is the line?\n"))
+
+#-----------------------------------------------Box Score/Individual Games------------------------------------------------------------
+season = '2023-24'
+
+# Create the player game log endpoint
+player_game_log = playergamelog.PlayerGameLog(player_id=playerID, season=season, season_type_all_star='Regular Season')
+
+# Call the API and get the result
+player_game_log_data = player_game_log.get_data_frames()[0]
+
+ovrCounter = 0
+
+ovrArr = []
+
+for x in range(len(player_game_log_data)):
+    lineCheck = 0
+    for stat in statList:
+        lineCheck += player_game_log_data[stat].iloc[x]
+    if lineCheck > line:
+        ovrCounter = ovrCounter + 1
+        ovrArr.append(lineCheck)
+
+
+print("------------------------------------------------------------------------------------------------------------------------------------------")
+print("| This season, " + playerName + " has gone over the line of " + str(line) + " " + str(statsNeeded) + " " + str(ovrCounter) + " times in " + str(len(player_game_log_data) - 1) + " games")
+print(ovrArr)
+# Display the player's box scores
+
+
+#-----------------------------------------------Code Graveyard------------------------------------------------------------
 
 # url = "https://api-nba-v1.p.rapidapi.com/players"
 
