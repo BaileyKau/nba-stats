@@ -8,7 +8,7 @@ import math
 
 #-----------------------------------------------Player Career Stats------------------------------------------------------------
 playerName = None
-statsDict = {}
+statsList = []
 
 while playerName != "q":
     playerName = input("Enter the player's full name: ")
@@ -18,7 +18,7 @@ while playerName != "q":
 
         if not player:
             #Work on NLP to improve this
-            print("Nice spelling retard")
+            print("Couldn't find this player.")
 
         else:
             playerID = player[0]['id']
@@ -92,13 +92,16 @@ Enter the statistic needed: """)
             print("| This season, " + playerName + " has gone over the line of " + str(line) + " " + str(statsNeeded) + " " + str(ovrCounter) + " times in " + str(len(player_game_log_data) - 1) + " games")
             print(ovrArr)
 
-            playerStat = playerName + " " + str(line) + " " + statsNeeded
+            playerStat = playerName + " " + str(line) + " " + statsNeeded + ": " + str(ovrCounter) + " out of " + str(len(player_game_log_data) - 1) + " games"
 
-            ovrLine = str(ovrCounter) + " out of " + str(len(player_game_log_data) - 1) + " games"
+            statsList.append(playerStat)
 
-            statsDict[playerStat] = ovrLine
+# For the spacing
+print()
 
-print(statsDict)
+#Print a recap
+for x in range(len(statsList)):
+    print(statsList[x])
 
 
 #-----------------------------------------------Code Graveyard------------------------------------------------------------
